@@ -9,6 +9,7 @@ import { IdeaCard } from '../../features/ideas/components/idea-card';
 import { Badge } from '../components/ui/badge';
 import { JobCard } from '../../features/jobs/components/job-card';
 import { TeamCard } from '../../features/teams/components/team-card';
+import type { Route } from '.react-router/types/app/+types/root';
 
 export const meta: MetaFunction = () => {
   return [
