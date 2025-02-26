@@ -1,20 +1,85 @@
-import { type MetaFunction } from 'react-router';
-import type { Route } from '.react-router/types/app/+types/root';
+import { Hero } from "~/common/components/hero";
+import type { Route } from "./+types/submit-page";
+import { Form } from "react-router";
+import { Label } from "@radix-ui/react-label";
+import { Input } from "~/common/components/ui/input";
+import InputPair from "~/common/components/input-pair";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "~/common/components/ui/select";
+import SelectPair from "~/common/components/select-pair";
 
-export const meta: MetaFunction = () => {
-  return [{ title: 'Submit Product | wemake' }, { name: 'description', content: 'Submit your product to wemake' }];
+export const meta: Route.MetaFunction = () => {
+	return [
+		{ title: "Submit Product | wemake" },
+		{ name: "description", content: "Submit your product to wemake" },
+	];
 };
 
-export function loader({ request }: Route.LoaderArgs) {
-  return {
-    categories: [],
-  };
-}
-
-export default function SubmitPage() {
-  return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-4xl font-bold">Submit Product</h1>
-    </div>
-  );
+export default function SubmitPage({ actionData }: Route.ComponentProps) {
+	return (
+		<div>
+			<Hero
+				title="Submit Your Product"
+				subtitle="Share your product with the world"
+			/>
+			<Form className="grid grid-cols-2 gap-10 max-w-screen-md mx-auto">
+				<div className="space-y-5">
+					<InputPair
+						label="Name"
+						description="This is the name of your product"
+						id="name"
+						name="name"
+						type="text"
+						required
+						placeholder="Name of your product"
+					/>
+					<InputPair
+						label="Tagline"
+						description="(60 characters or less)"
+						id="tagline"
+						name="tagline"
+						type="text"
+						required
+						placeholder="A concise tagline for your product"
+					/>
+					<InputPair
+						label="URL"
+						description="The URL of your product"
+						id="url"
+						name="url"
+						type="url"
+						required
+						placeholder="https://example.com"
+					/>
+					<InputPair
+						textArea
+						label="Description"
+						description="A detailed description of your product"
+						id="description"
+						name="description"
+						type="text"
+						required
+						placeholder="A detailed description of your product"
+					/>
+					<SelectPair
+						label="Category"
+						description="The category of your product"
+						name="category"
+						required
+						placeholder="Select a category"
+						options={[
+							{ label: "Value 1", value: "1" },
+							{ label: "Value 2", value: "2" },
+							{ label: "Value 3", value: "3" },
+						]}
+					/>
+				</div>
+			</Form>
+		</div>
+	);
 }
