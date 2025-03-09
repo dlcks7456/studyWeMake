@@ -1,15 +1,8 @@
 import { Hero } from "~/common/components/hero";
-import type { Route } from "./+types/submit-page";
+import type { Route } from "./+types/submit-product-page";
 import { Form } from "react-router";
 import { Input } from "~/common/components/ui/input";
 import InputPair from "~/common/components/input-pair";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "~/common/components/ui/select";
 import SelectPair from "~/common/components/select-pair";
 import { Label } from "~/common/components/ui/label";
 import { useState } from "react";
