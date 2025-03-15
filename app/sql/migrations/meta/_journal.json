@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1741929567277,
+      "tag": "0000_yellow_cloak",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1741930156271,
+      "tag": "0001_modern_toxin",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1741931214071,
+      "tag": "0002_tiny_spitfire",
+      "breakpoints": true
+    }
+  ]
+}

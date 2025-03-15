@@ -1,0 +1,2 @@
+ALTER TABLE "post_replies" ADD COLUMN "parent_id" bigint;--> statement-breakpoint
+ALTER TABLE "post_replies" ADD CONSTRAINT "post_replies_parent_id_post_replies_post_reply_id_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."post_replies"("post_reply_id") ON DELETE cascade ON UPDATE no action;

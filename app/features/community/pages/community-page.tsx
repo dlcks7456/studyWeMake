@@ -12,12 +12,20 @@ import { PERIOD_OPTIONS, SORT_OPTIONS } from "../constants";
 import { DropdownMenuCheckboxItem } from "@radix-ui/react-dropdown-menu";
 import { Input } from "~/common/components/ui/input";
 import { PostCard } from "../components/post-card";
+import { getPosts, getTopics } from "../queries";
 
 export function meta({}: Route.MetaArgs) {
 	return [{ title: "Community | wemake" }];
 }
 
-export default function CommunityPage() {
+export const loader = async () => {
+	const topics = await getTopics();
+	const posts = await getPosts();
+
+	return { topics, posts };
+};
+
+export default function CommunityPage({ loaderData }: Route.ComponentProps) {
 	const [searchParams, setSearchParams] = useSearchParams();
 	const sorting = searchParams.get("sorting") || "newest";
 	const period = searchParams.get("period") || "all";
@@ -92,15 +100,16 @@ export default function CommunityPage() {
 						</Button>
 					</div>
 					<div className="space-y-5">
-						{Array.from({ length: 11 }).map((_, index) => (
+						{loaderData.posts.map((post) => (
 							<PostCard
-								key={index}
-								id={`postId-${index}`}
-								title="What is the best productivity tool?"
-								author="Nico"
-								avatarUrl="https://github.com/apple.png"
-								category="Productivity"
-								postedAt="12 hours ago"
+								key={post.post_id}
+								id={post.post_id}
+								title={post.title}
+								author={post.author}
+								avatarUrl={post.author_avatar}
+								category={post.topic}
+								postedAt={post.created_at}
+								votesCount={post.upvotes}
 								expanded={true}
 							/>
 						))}
@@ -111,21 +120,14 @@ export default function CommunityPage() {
 						Topics
 					</span>
 					<div className="flex flex-col gap-2 items-start">
-						{[
-							"AI Tools",
-							"Design Tools",
-							"Development Tools",
-							"Productivity Tools",
-							"Marketing Tools",
-							"Other Tools",
-						].map((category) => (
+						{loaderData.topics.map((topic) => (
 							<Button asChild variant={"link"} className="pl-0">
 								<Link
-									key={category}
-									to={`/community?topic=${category}`}
+									key={topic.slug}
+									to={`/community?topic=${topic.slug}`}
 									className="font-semibold"
 								>
-									{category}
+									{topic.name}
 								</Link>
 							</Button>
 						))}

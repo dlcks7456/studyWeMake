@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Input } from "~/common/components/ui/input";
 import { Button } from "~/common/components/ui/button";
 import { Label } from "~/common/components/ui/label";
+import { ROLES } from "../constant";
 
 export const meta: Route.MetaFunction = () => {
 	return [
@@ -42,12 +43,7 @@ export default function SettingsPage() {
 							name="role"
 							placeholder="Select your role"
 							required
-							options={[
-								{ label: "Designer", value: "designer" },
-								{ label: "Developer", value: "developer" },
-								{ label: "Marketer", value: "marketer" },
-								{ label: "Other", value: "other" },
-							]}
+							options={ROLES}
 						/>
 						<InputPair
 							label="Headline"
