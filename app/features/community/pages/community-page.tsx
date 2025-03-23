@@ -1,6 +1,6 @@
 import { Hero } from "~/common/components/hero";
 import type { Route } from "./+types/community-page";
-import { Form, Link, useSearchParams } from "react-router";
+import { Await, Form, Link, useSearchParams } from "react-router";
 import { Button } from "~/common/components/ui/button";
 import {
 	DropdownMenu,
@@ -13,25 +13,43 @@ import { DropdownMenuCheckboxItem } from "@radix-ui/react-dropdown-menu";
 import { Input } from "~/common/components/ui/input";
 import { PostCard } from "../components/post-card";
 import { getPosts, getTopics } from "../queries";
+import { Suspense } from "react";
 
 export function meta({}: Route.MetaArgs) {
 	return [{ title: "Community | wemake" }];
 }
 
-export const loader = async () => {
-	const topics = await getTopics();
-	const posts = await getPosts();
+// export const loader = async () => {
+// 	const [topics, posts] = await Promise.all([getTopics(), getPosts()]);
+// 	return { topics, posts };
+// };
 
+// export const clientLoader = async ({ serverLoader } : Route.ClientLoaderArgs) => {
+// 	const serverData = await serverLoader();
+// 	// const topics = await getTopics();
+// 	// const posts = await getPosts();
+
+// 	const [topics, posts] = await Promise.all([getTopics(), getPosts()]);
+
+// 	// const topics = await getTopics();
+// 	// const posts = getPosts();
+
+// 	return { topics, posts };
+// };
+
+export const loader = async () => {
+	const [topics, posts] = await Promise.all([getTopics(), getPosts()]);
 	return { topics, posts };
 };
 
 export default function CommunityPage({ loaderData }: Route.ComponentProps) {
+	const { topics, posts } = loaderData;
 	const [searchParams, setSearchParams] = useSearchParams();
 	const sorting = searchParams.get("sorting") || "newest";
 	const period = searchParams.get("period") || "all";
 
 	return (
-		<div>
+		<div className="space-y-20">
 			<Hero
 				title="Community"
 				subtitle="Ask questions, share ideas, and get help from the community."
@@ -100,7 +118,7 @@ export default function CommunityPage({ loaderData }: Route.ComponentProps) {
 						</Button>
 					</div>
 					<div className="space-y-5">
-						{loaderData.posts.map((post) => (
+						{posts.map((post) => (
 							<PostCard
 								key={post.post_id}
 								id={post.post_id}
@@ -120,7 +138,7 @@ export default function CommunityPage({ loaderData }: Route.ComponentProps) {
 						Topics
 					</span>
 					<div className="flex flex-col gap-2 items-start">
-						{loaderData.topics.map((topic) => (
+						{topics.map((topic) => (
 							<Button asChild variant={"link"} className="pl-0">
 								<Link
 									key={topic.slug}
@@ -136,4 +154,8 @@ export default function CommunityPage({ loaderData }: Route.ComponentProps) {
 			</div>
 		</div>
 	);
+}
+
+export function HydrateFallback() {
+	return <div>Loading...</div>;
 }

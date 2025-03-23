@@ -3,6 +3,8 @@ import type { Route } from "./+types/leaderboards-page";
 import { Hero } from "~/common/components/hero";
 import { ProductCard } from "../components/product-card";
 import { Link } from "react-router";
+import { DateTime } from "luxon";
+import { getProductsByDateRange } from "../queries";
 
 export const meta: Route.MetaFunction = () => {
 	return [
@@ -11,7 +13,34 @@ export const meta: Route.MetaFunction = () => {
 	];
 };
 
-export default function LeaderboardsPage() {
+export const loader = async () => {
+	const [dailyProducts, weeklyProducts, monthlyProducts, yearlyProducts] =
+		await Promise.all([
+			getProductsByDateRange({
+				startDate: DateTime.now().startOf("day"),
+				endDate: DateTime.now().endOf("day"),
+				limit: 7,
+			}),
+			getProductsByDateRange({
+				startDate: DateTime.now().startOf("week"),
+				endDate: DateTime.now().endOf("week"),
+				limit: 7,
+			}),
+			getProductsByDateRange({
+				startDate: DateTime.now().startOf("month"),
+				endDate: DateTime.now().endOf("month"),
+				limit: 7,
+			}),
+			getProductsByDateRange({
+				startDate: DateTime.now().startOf("year"),
+				endDate: DateTime.now().endOf("year"),
+				limit: 7,
+			}),
+		]);
+	return { dailyProducts, weeklyProducts, monthlyProducts, yearlyProducts };
+};
+
+export default function LeaderboardsPage({ loaderData }: Route.ComponentProps) {
 	return (
 		<div className="space-y-20">
 			<Hero
@@ -28,15 +57,15 @@ export default function LeaderboardsPage() {
 					</p>
 				</div>
 
-				{Array.from({ length: 7 }).map((_, index) => (
+				{loaderData.dailyProducts.map((product) => (
 					<ProductCard
-						key={index}
-						id={`productId-${index}`}
-						name={`Product Name`}
-						description={`Product Description`}
-						commentCount={12}
-						viewCount={12}
-						votesCount={120}
+						key={product.product_id}
+						id={product.product_id.toString()}
+						name={product.name}
+						description={product.description}
+						reviewsCount={product.reviews}
+						viewCount={product.views}
+						votesCount={product.upvotes}
 					/>
 				))}
 
@@ -56,15 +85,15 @@ export default function LeaderboardsPage() {
 					</p>
 				</div>
 
-				{Array.from({ length: 7 }).map((_, index) => (
+				{loaderData.weeklyProducts.map((product) => (
 					<ProductCard
-						key={index}
-						id={`productId-${index}`}
-						name={`Product Name`}
-						description={`Product Description`}
-						commentCount={12}
-						viewCount={12}
-						votesCount={120}
+						key={product.product_id}
+						id={product.product_id.toString()}
+						name={product.name}
+						description={product.description}
+						reviewsCount={product.reviews}
+						viewCount={product.views}
+						votesCount={product.upvotes}
 					/>
 				))}
 
@@ -84,15 +113,15 @@ export default function LeaderboardsPage() {
 					</p>
 				</div>
 
-				{Array.from({ length: 7 }).map((_, index) => (
+				{loaderData.monthlyProducts.map((product) => (
 					<ProductCard
-						key={index}
-						id={`productId-${index}`}
-						name={`Product Name`}
-						description={`Product Description`}
-						commentCount={12}
-						viewCount={12}
-						votesCount={120}
+						key={product.product_id}
+						id={product.product_id.toString()}
+						name={product.name}
+						description={product.description}
+						reviewsCount={product.reviews}
+						viewCount={product.views}
+						votesCount={product.upvotes}
 					/>
 				))}
 
@@ -112,15 +141,15 @@ export default function LeaderboardsPage() {
 					</p>
 				</div>
 
-				{Array.from({ length: 7 }).map((_, index) => (
+				{loaderData.yearlyProducts.map((product) => (
 					<ProductCard
-						key={index}
-						id={`productId-${index}`}
-						name={`Product Name`}
-						description={`Product Description`}
-						commentCount={12}
-						viewCount={12}
-						votesCount={120}
+						key={product.product_id}
+						id={product.product_id.toString()}
+						name={product.name}
+						description={product.description}
+						reviewsCount={product.reviews}
+						viewCount={product.views}
+						votesCount={product.upvotes}
 					/>
 				))}
 
