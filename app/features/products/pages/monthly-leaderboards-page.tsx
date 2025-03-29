@@ -6,6 +6,9 @@ import { Hero } from "~/common/components/hero";
 import { ProductCard } from "../components/product-card";
 import { Button } from "~/common/components/ui/button";
 import { ProductPagenation } from "~/common/components/product-pagenation";
+import { getProductPagesByDateRange, getProductsByDateRange } from "../queries";
+import { PAGE_SIZE } from "../constants";
+
 const paramsSchema = z.object({
 	year: z.coerce.number(),
 	month: z.coerce.number(),
@@ -40,7 +43,7 @@ export const meta: Route.MetaFunction = ({ params, data }) => {
 	];
 };
 
-export const loader = ({ params }: Route.LoaderArgs) => {
+export const loader = async ({ params, request }: Route.LoaderArgs) => {
 	const { success, data: parsedData } = paramsSchema.safeParse(params);
 
 	if (!success) {
@@ -77,7 +80,23 @@ export const loader = ({ params }: Route.LoaderArgs) => {
 		);
 	}
 
+	const url = new URL(request.url);
+
+	const products = await getProductsByDateRange({
+		startDate: date.startOf("month"),
+		endDate: date.endOf("month"),
+		limit: PAGE_SIZE,
+		page: Number(url.searchParams.get("page") || 1),
+	});
+
+	const totalPages = await getProductPagesByDateRange({
+		startDate: date.startOf("month"),
+		endDate: date.endOf("month"),
+	});
+
 	return {
+		products,
+		totalPages,
 		...parsedData,
 	};
 };
@@ -129,19 +148,19 @@ export default function MonthlyLeaderboardsPage({
 				) : null}
 			</div>
 			<div className="space-y-5 w-full max-w-screen-md mx-auto">
-				{Array.from({ length: 11 }).map((_, index) => (
+				{loaderData.products.map((product) => (
 					<ProductCard
-						key={index}
-						id={`productId-${index}`}
-						name={`Product Name`}
-						description={`Product Description`}
-						commentCount={12}
-						viewCount={12}
-						votesCount={120}
+						key={product.product_id}
+						id={product.product_id.toString()}
+						name={product.name}
+						description={product.description}
+						reviewsCount={product.reviews}
+						viewCount={product.views}
+						votesCount={product.upvotes}
 					/>
 				))}
 			</div>
-			<ProductPagenation totalPages={10} />
+			<ProductPagenation totalPages={loaderData.totalPages} />
 		</div>
 	);
 }
