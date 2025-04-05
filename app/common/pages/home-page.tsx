@@ -8,6 +8,8 @@ import { TeamCard } from "../../features/teams/components/team-card";
 import { getProductsByDateRange } from "../../features/products/queries";
 import { DateTime } from "luxon";
 import type { Route } from "./+types/home-page";
+import { getPosts } from "../../features/community/queries";
+import { getGptIdeas } from "~/features/ideas/queries";
 
 export const meta: MetaFunction = () => {
 	return [
@@ -25,7 +27,16 @@ export const loader = async () => {
 		limit: 7,
 	});
 
-	return { products };
+	const posts = await getPosts({
+		limit: 7,
+		sorting: "newest",
+	});
+
+	const ideas = await getGptIdeas({
+		limit: 7,
+	});
+
+	return { products, posts, ideas };
 };
 
 export default function HomePage({ loaderData }: Route.ComponentProps) {
@@ -65,20 +76,18 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
 						The latest discussions from our community.
 					</p>
 					<Button variant="link" asChild className="text-lg p-0">
-						<Link to="/products/leaderboards">
-							Explore all discussions &rarr;
-						</Link>
+						<Link to="/community">Explore all discussions &rarr;</Link>
 					</Button>
 				</div>
-				{Array.from({ length: 11 }).map((_, index) => (
+				{loaderData.posts.map((post) => (
 					<PostCard
-						key={index}
-						id={index}
-						title="What is the best productivity tool?"
-						author="Nico"
-						avatarUrl="https://github.com/apple.png"
-						category="Productivity"
-						postedAt="12 hours ago"
+						key={post.post_id}
+						id={post.post_id}
+						title={post.title}
+						author={post.author}
+						avatarUrl={post.author_avatar}
+						category={post.topic}
+						postedAt={post.created_at}
 					/>
 				))}
 			</div>
@@ -94,15 +103,15 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
 						<Link to="/ideas">Explore all ideas &rarr;</Link>
 					</Button>
 				</div>
-				{Array.from({ length: 11 }).map((_, index) => (
+				{loaderData.ideas.map((idea) => (
 					<IdeaCard
-						key={index}
-						id="ideaId"
-						title="A startup that creates an AI-powered generated personal trainer, delivering customized fitness recommendations and tracking of progress using a mobile app to track workouts and progress as well as a website to manage the business."
-						viewCount={123}
-						postedAt="12 hours ago"
-						likesCount={12}
-						claimed={index % 2 === 0}
+						key={idea.gpt_idea_id}
+						id={idea.gpt_idea_id}
+						title={idea.idea}
+						viewCount={idea.views}
+						postedAt={idea.created_at}
+						likesCount={idea.likes}
+						claimed={idea.is_claimed}
 					/>
 				))}
 			</div>
