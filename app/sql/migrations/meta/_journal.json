@@ -36,6 +36,20 @@
       "when": 1742730105257,
       "tag": "0004_safe_odin",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1744448099267,
+      "tag": "0005_colossal_solo",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1744448266572,
+      "tag": "0006_gifted_tyger_tiger",
+      "breakpoints": true
     }
   ]
 }

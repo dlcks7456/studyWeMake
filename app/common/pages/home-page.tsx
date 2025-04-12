@@ -10,6 +10,8 @@ import { DateTime } from "luxon";
 import type { Route } from "./+types/home-page";
 import { getPosts } from "../../features/community/queries";
 import { getGptIdeas } from "~/features/ideas/queries";
+import { getJobs } from "~/features/jobs/queries";
+import { getTeams } from "~/features/teams/queries";
 
 export const meta: MetaFunction = () => {
 	return [
@@ -36,7 +38,13 @@ export const loader = async () => {
 		limit: 7,
 	});
 
-	return { products, posts, ideas };
+	const jobs = await getJobs({
+		limit: 7,
+	});
+
+	const teams = await getTeams({ limit: 7 });
+
+	return { products, posts, ideas, jobs, teams };
 };
 
 export default function HomePage({ loaderData }: Route.ComponentProps) {
@@ -127,18 +135,18 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
 						<Link to="/jobs">Explore all jobs &rarr;</Link>
 					</Button>
 				</div>
-				{Array.from({ length: 11 }).map((_, index) => (
+				{loaderData.jobs.map((job) => (
 					<JobCard
-						key={index}
-						id="jobId"
-						company="Meta"
-						companyLogoUrl="https://github.com/facebook.png"
-						companyHq="San Francisco, CA"
-						title="Software Engineer"
-						postedAt="12 hours ago"
-						type="Full-time"
-						positionLocation="Remote"
-						salary="$100,000 - $120,000"
+						key={job.job_id}
+						id={job.job_id}
+						company={job.company_name}
+						companyLogoUrl={job.company_logo}
+						companyHq={job.location}
+						title={job.position}
+						postedAt={job.created_at}
+						type={job.job_type}
+						positionLocation={job.location}
+						salary={job.salary_range}
 					/>
 				))}
 			</div>
@@ -154,18 +162,14 @@ export default function HomePage({ loaderData }: Route.ComponentProps) {
 						<Link to="/teams">Explore all teams &rarr;</Link>
 					</Button>
 				</div>
-				{Array.from({ length: 11 }).map((_, index) => (
+				{loaderData.teams.map((team) => (
 					<TeamCard
-						key={index}
-						id="teamId"
-						leaderUserName="lynn"
-						leaderAvatarUrl="https://github.com/inthetiger.png"
-						positions={[
-							"React Developer",
-							"Backend Developer",
-							"Product Manager",
-						]}
-						projectDescription="a new social media platform"
+						key={team.team_id}
+						id={team.team_id}
+						leaderUserName={team.team_leader.username}
+						leaderAvatarUrl={team.team_leader.avatar}
+						roles={team.roles}
+						productDescription={team.product_description}
 					/>
 				))}
 			</div>

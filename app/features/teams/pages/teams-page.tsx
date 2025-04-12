@@ -1,7 +1,7 @@
 import { TeamCard } from "../components/team-card";
 import type { Route } from "./+types/teams-page";
 import { Hero } from "~/common/components/hero";
-
+import { getTeams } from "../queries";
 export const meta: Route.MetaFunction = () => {
 	return [
 		{ title: "Teams | wemake" },
@@ -9,23 +9,24 @@ export const meta: Route.MetaFunction = () => {
 	];
 };
 
-export default function TeamsPage() {
+export const loader = async () => {
+	const teams = await getTeams({ limit: 20 });
+	return { teams };
+};
+
+export default function TeamsPage({ loaderData }: Route.ComponentProps) {
 	return (
 		<div className="space-y-20">
 			<Hero title="Team" subtitle="Find a team looking for any member" />
 			<div className="grid grid-cols-4 gap-4">
-				{Array.from({ length: 11 }).map((_, index) => (
+				{loaderData.teams.map((team) => (
 					<TeamCard
-						key={index}
-						id="teamId"
-						leaderUserName="lynn"
-						leaderAvatarUrl="https://github.com/inthetiger.png"
-						positions={[
-							"React Developer",
-							"Backend Developer",
-							"Product Manager",
-						]}
-						projectDescription="a new social media platform"
+						key={team.team_id}
+						id={team.team_id}
+						leaderUserName={team.team_leader.username}
+						leaderAvatarUrl={team.team_leader.avatar}
+						roles={team.roles}
+						productDescription={team.product_description}
 					/>
 				))}
 			</div>

@@ -5,7 +5,7 @@ SELECT
 	posts.created_at,
 	topics.name AS topic,
 	profiles.name AS author,
-  profiles.avatar AS author_avatar,
+  	profiles.avatar AS author_avatar,
 	profiles.username AS author_username,
 	posts.upvotes,
 	topics.slug AS topic_slug

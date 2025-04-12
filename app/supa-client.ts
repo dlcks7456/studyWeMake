@@ -21,6 +21,11 @@ type Database = MergeDeep<
 						SupabaseDatabase["public"]["Views"]["gpt_ideas_view"]["Row"]
 					>;
 				};
+				teams_profile_list_view: {
+					Row: SetNonNullable<
+						SupabaseDatabase["public"]["Views"]["teams_profile_list_view"]["Row"]
+					>;
+				};
 			};
 		};
 	}
