@@ -131,7 +131,7 @@ export default function YearlyLeaderboardsPage({
 						key={product.product_id}
 						id={product.product_id.toString()}
 						name={product.name}
-						description={product.description}
+						description={product.tagline}
 						reviewsCount={product.reviews}
 						viewCount={product.views}
 						votesCount={product.upvotes}

@@ -6,6 +6,7 @@ import { ProductCard } from "../components/product-card";
 import { Form } from "react-router";
 import { Input } from "~/common/components/ui/input";
 import { Button } from "~/common/components/ui/button";
+import { getProductBySearch, getPagesBySearch } from "../queries";
 export const meta: Route.MetaFunction = () => {
 	return [
 		{ title: "Search Products | wemake" },
@@ -18,7 +19,7 @@ const paramsSchema = z.object({
 	page: z.coerce.number().optional().default(1),
 });
 
-export function loader({ request }: Route.LoaderArgs) {
+export async function loader({ request }: Route.LoaderArgs) {
 	const url = new URL(request.url);
 	const { success, data: parsedData } = paramsSchema.safeParse(
 		Object.fromEntries(url.searchParams),
@@ -27,9 +28,23 @@ export function loader({ request }: Route.LoaderArgs) {
 	if (!success) {
 		throw new Error("Invalid search parameters");
 	}
+
+	if (parsedData.query === "") {
+		return { products: [], totalPages: 1 };
+	}
+	const products = await getProductBySearch({
+		query: parsedData.query,
+		page: parsedData.page,
+	});
+
+	const totalPages = await getPagesBySearch({
+		query: parsedData.query,
+	});
+
+	return { products, totalPages };
 }
 
-export default function SearchPage() {
+export default function SearchPage({ loaderData }: Route.ComponentProps) {
 	return (
 		<div className="space-y-10">
 			<Hero
@@ -45,19 +60,19 @@ export default function SearchPage() {
 				<Button type="submit">Search</Button>
 			</Form>
 			<div className="space-y-5 w-full max-w-screen-md mx-auto">
-				{Array.from({ length: 11 }).map((_, index) => (
+				{loaderData.products.map((product) => (
 					<ProductCard
-						key={index}
-						id={`productId-${index}`}
-						name={`Product Name`}
-						description={`Product Description`}
-						commentCount={12}
-						viewCount={12}
-						votesCount={120}
+						key={product.product_id}
+						id={product.product_id}
+						name={product.name}
+						description={product.tagline}
+						viewCount={Number(product.views)}
+						votesCount={Number(product.upvotes)}
+						reviewsCount={Number(product.reviews)}
 					/>
 				))}
 			</div>
-			<ProductPagenation totalPages={10} />
+			<ProductPagenation totalPages={loaderData.totalPages} />
 		</div>
 	);
 }
