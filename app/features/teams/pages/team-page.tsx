@@ -15,6 +15,9 @@ import {
 	CardHeader,
 	CardTitle,
 } from "~/common/components/ui/card";
+import { z } from "zod";
+import { getTeamById } from "../queries";
+
 export const meta: Route.MetaFunction = () => {
 	return [
 		{ title: "Team Details | wemake" },
@@ -25,28 +28,44 @@ export const meta: Route.MetaFunction = () => {
 	];
 };
 
-export default function TeamPage() {
+const teamIdSchema = z.object({
+	teamId: z.coerce.number(),
+});
+
+export const loader = async ({ params }: Route.LoaderArgs) => {
+	const { success, data } = teamIdSchema.safeParse(params);
+
+	if (!success) {
+		throw new Response("Not Found", { status: 404 });
+	}
+
+	const team = await getTeamById({ teamId: data.teamId });
+
+	return { team };
+};
+
+export default function TeamPage({ loaderData }: Route.ComponentProps) {
 	return (
 		<div className="space-y-20">
-			<Hero title="Join lynn's team" />
+			<Hero title={`Join ${loaderData.team.team_leader.name}'s team`} />
 			<div className="grid grid-cols-6 gap-40 items-start">
 				<div className="col-span-4 grid grid-cols-4 gap-5">
 					{[
 						{
 							title: "Product Name",
-							value: "Doggie Social",
+							value: loaderData.team.product_name,
 						},
 						{
 							title: "Stage",
-							value: "MVP",
+							value: loaderData.team.product_stage,
 						},
 						{
 							title: "Team size",
-							value: 3,
+							value: loaderData.team.team_size,
 						},
 						{
 							title: "Available equity",
-							value: 100,
+							value: loaderData.team.equity_split,
 						},
 					].map((item) => (
 						<Card>
@@ -54,7 +73,7 @@ export default function TeamPage() {
 								<CardTitle className="text-sm font-medium text-muted-foreground">
 									{item.title}
 								</CardTitle>
-								<CardContent className="p-0 font-bold text-2xl">
+								<CardContent className="p-0 font-bold text-2xl capitalize">
 									<p>{item.value}</p>
 								</CardContent>
 							</CardHeader>
@@ -67,12 +86,7 @@ export default function TeamPage() {
 							</CardTitle>
 							<CardContent className="p-0 font-bold text-2xl">
 								<ul className="text-lg list-disc list-inside">
-									{[
-										"React Developer",
-										"Backend Developer",
-										"Product Manager",
-										"UI/UX Designer",
-									].map((item) => (
+									{loaderData.team.roles.split(",").map((item) => (
 										<li key={item}>{item}</li>
 									))}
 								</ul>
@@ -85,10 +99,7 @@ export default function TeamPage() {
 								Idea description
 							</CardTitle>
 							<CardContent className="p-0 font-medium text-xl">
-								<p>
-									Lorem ipsum dolor sit amet consectetur adipisicing elit.
-									Quisquam, quos.
-								</p>
+								<p>{loaderData.team.product_description}</p>
 							</CardContent>
 						</CardHeader>
 					</Card>
@@ -96,12 +107,23 @@ export default function TeamPage() {
 				<aside className="col-span-2 border rounded-lg shadow-sm p-6 space-y-5">
 					<div className="flex gap-5">
 						<Avatar className="size-14">
-							<AvatarFallback>N</AvatarFallback>
-							<AvatarImage src="https://github.com/shadcn.png" />
+							<AvatarFallback>
+								{loaderData.team.team_leader.name[0]}
+							</AvatarFallback>
+							{loaderData.team.team_leader.avatar !== null ? (
+								<AvatarImage src={loaderData.team.team_leader.avatar} />
+							) : null}
 						</Avatar>
 						<div className="flex flex-col">
-							<h4 className="text-lg font-medium">Chan</h4>
-							<Badge variant="secondary">Entrepreneur</Badge>
+							<h4 className="text-lg font-medium">
+								{loaderData.team.team_leader.name}
+							</h4>
+							<Badge
+								variant="secondary"
+								className="capitalize flex justify-center"
+							>
+								{loaderData.team.team_leader.role}
+							</Badge>
 						</div>
 					</div>
 					<Form className="space-y-5">

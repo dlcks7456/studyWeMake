@@ -22,12 +22,31 @@ import {
 } from "~/common/components/ui/avatar";
 import { Badge } from "~/common/components/ui/badge";
 import { Reply } from "~/features/community/components/reply";
+import { z } from "zod";
+import { getPostById } from "../queries";
+import { DateTime } from "luxon";
+
+const postIdSchema = z.object({
+	postId: z.coerce.number(),
+});
 
 export function meta({}: Route.MetaArgs) {
 	return [{ title: "Post | wemake" }];
 }
 
-export default function PostPage() {
+export const loader = async ({ params }: Route.LoaderArgs) => {
+	const { success, data } = postIdSchema.safeParse(params);
+
+	if (!success) {
+		throw new Response("Not Found", { status: 404 });
+	}
+
+	const post = await getPostById({ postId: data.postId });
+
+	return { post };
+};
+
+export default function PostPage({ loaderData }: Route.ComponentProps) {
 	return (
 		<div className="space-y-10">
 			<div>
@@ -41,14 +60,16 @@ export default function PostPage() {
 						<BreadcrumbSeparator />
 						<BreadcrumbItem>
 							<BreadcrumbLink asChild>
-								<Link to="/community?topic=productivity">Productivity</Link>
+								<Link to={`/community?topic=${loaderData.post.topic_slug}`}>
+									{loaderData.post.topic_name}
+								</Link>
 							</BreadcrumbLink>
 						</BreadcrumbItem>
 						<BreadcrumbSeparator />
 						<BreadcrumbItem>
 							<BreadcrumbLink asChild>
-								<Link to="/community/postId">
-									What is the best productivity tool?
+								<Link to={`/community/post/${loaderData.post.post_id}`}>
+									{loaderData.post.title}
 								</Link>
 							</BreadcrumbLink>
 						</BreadcrumbItem>
@@ -62,22 +83,20 @@ export default function PostPage() {
 							<ChevronUpIcon className="size-4 shrink-0" />
 							<span>10</span>
 						</Button>
-						<div className="space-y-20">
+						<div className="space-y-20 w-full">
 							<div className="space-y-2">
-								<h2 className="text-3xl font-bold">
-									What is the best productivity tool?
-								</h2>
+								<h2 className="text-3xl font-bold">{loaderData.post.title}</h2>
 								<div className="flex items-center gap-2 text-sm text-foreground">
-									<span>@nico</span>
+									<span>@{loaderData.post.author_name}</span>
 									<DotIcon className="size-5" />
-									<span>12 hours ago</span>
+									<span>
+										{DateTime.fromISO(loaderData.post.created_at).toRelative()}
+									</span>
 									<DotIcon className="size-5" />
-									<span>10 replies</span>
+									<span>{loaderData.post.replies} replies</span>
 								</div>
 								<p className="text-muted-foreground w-2/3">
-									Hello, I'm looking for the best productivity tool. I've tried
-									many, but I'm not sure which one is the best. I have tried
-									Notion, Todoist, and Trello.
+									{loaderData.post.content}
 								</p>
 							</div>
 							<Form className="flex items-start gap-5 w-3/4">
@@ -111,17 +130,30 @@ export default function PostPage() {
 				<aside className="col-span-2 border rounded-lg shadow-sm p-6 space-y-5">
 					<div className="flex gap-5">
 						<Avatar className="size-14">
-							<AvatarFallback>N</AvatarFallback>
-							<AvatarImage src="https://github.com/shadcn.png" />
+							<AvatarFallback>{loaderData.post.author_name[0]}</AvatarFallback>
+							{loaderData.post.author_avatar !== null ? (
+								<AvatarImage src={loaderData.post.author_avatar} />
+							) : null}
 						</Avatar>
-						<div className="flex flex-col">
-							<h4 className="text-lg font-medium">Chan</h4>
-							<Badge variant="secondary">Entrepreneur</Badge>
+						<div className="flex flex-col items-start">
+							<h4 className="text-lg font-medium">
+								{loaderData.post.author_name}
+							</h4>
+							<Badge
+								variant="secondary"
+								className="capitalize flex justify-center"
+							>
+								{loaderData.post.author_role}
+							</Badge>
 						</div>
 					</div>
 					<div className="text-sm flex flex-col gap-2">
-						<span>🍰 Joined 3 months ago</span>
-						<span>🚀 Launched 10 products</span>
+						<span>
+							🍰 Joined{" "}
+							{DateTime.fromISO(loaderData.post.author_created_at).toRelative()}{" "}
+							ago
+						</span>
+						<span>🚀 Launched {loaderData.post.product_count} products</span>
 					</div>
 					<Button variant="outline" className="w-full">
 						Follow
