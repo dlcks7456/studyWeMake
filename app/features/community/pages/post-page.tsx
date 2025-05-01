@@ -23,7 +23,7 @@ import {
 import { Badge } from "~/common/components/ui/badge";
 import { Reply } from "~/features/community/components/reply";
 import { z } from "zod";
-import { getPostById } from "../queries";
+import { getPostById, getReplies } from "../queries";
 import { DateTime } from "luxon";
 
 const postIdSchema = z.object({
@@ -42,8 +42,8 @@ export const loader = async ({ params }: Route.LoaderArgs) => {
 	}
 
 	const post = await getPostById({ postId: data.postId });
-
-	return { post };
+	const replies = await getReplies({ postId: data.postId });
+	return { post, replies };
 };
 
 export default function PostPage({ loaderData }: Route.ComponentProps) {
@@ -83,8 +83,8 @@ export default function PostPage({ loaderData }: Route.ComponentProps) {
 							<ChevronUpIcon className="size-4 shrink-0" />
 							<span>10</span>
 						</Button>
-						<div className="space-y-20 w-full">
-							<div className="space-y-2">
+						<div className="space-y-5 w-full">
+							<div className="space-y-2 mb-20">
 								<h2 className="text-3xl font-bold">{loaderData.post.title}</h2>
 								<div className="flex items-center gap-2 text-sm text-foreground">
 									<span>@{loaderData.post.author_name}</span>
@@ -115,14 +115,16 @@ export default function PostPage({ loaderData }: Route.ComponentProps) {
 							</Form>
 							<div className="space-y-10">
 								<h4 className="font-semibold">Replies</h4>
-
-								<Reply
-									avatarUrl="https://github.com/apple.png"
-									username="Chan"
-									timestamp="12 hours ago"
-									content="Lorem ipsum dolor sit amet consectetur adipisicing elit."
-									topLevel={true}
-								/>
+								{loaderData.replies.map((reply) => (
+									<Reply
+										avatarUrl={reply.user?.avatar ? reply.user.avatar : null}
+										username={reply.user?.username ? reply.user.username : null}
+										timestamp={reply.created_at}
+										content={reply.reply}
+										topLevel={true}
+										replies={reply.post_replies}
+									/>
+								))}
 							</div>
 						</div>
 					</div>
