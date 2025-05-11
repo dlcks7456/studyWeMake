@@ -1,4 +1,17 @@
+import { useOutletContext } from "react-router";
 import type { Route } from "./+types/profile-page";
+import { client } from "~/supa-client";
+
+// export const loader = async ({ params }: Route.LoaderArgs) => {
+// 	await client.rpc("track_event", {
+// 		event_type: "profile_view",
+// 		event_data: {
+// 			username: params.username,
+// 		},
+// 	});
+
+// 	return null;
+// };
 
 export const meta: Route.MetaFunction = () => {
 	return [
@@ -8,18 +21,19 @@ export const meta: Route.MetaFunction = () => {
 };
 
 export default function ProfilePage() {
+	const { headline, bio } = useOutletContext<{
+		headline: string;
+		bio: string;
+	}>();
 	return (
 		<div className="max-w-screen-md flex flex-col space-y-10">
 			<div>
 				<h4 className="text-lg font-bold">Headline</h4>
-				<p className="text-muted-foreground">I'm a product designer</p>
+				<p className="text-muted-foreground">{headline}</p>
 			</div>
 			<div>
 				<h4 className="text-lg font-bold">About</h4>
-				<p className="text-muted-foreground">
-					I'm a product designer. I'm a product designer. I'm a product
-					designer.
-				</p>
+				<p className="text-muted-foreground">{bio}</p>
 			</div>
 		</div>
 	);

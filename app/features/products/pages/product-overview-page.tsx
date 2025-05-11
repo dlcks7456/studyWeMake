@@ -2,6 +2,7 @@ import { ChevronUpIcon, StarIcon } from "lucide-react";
 import type { Route } from "./+types/product-overview-page";
 import { Button } from "~/common/components/ui/button";
 import { Link, useOutletContext } from "react-router";
+import { client } from "~/supa-client";
 
 // export const meta: Route.MetaFunction = () => {
 // 	return [
@@ -9,6 +10,15 @@ import { Link, useOutletContext } from "react-router";
 // 		{ name: "description", content: "Product Overview" },
 // 	];
 // };
+
+export const loader = async ({ params }: Route.LoaderArgs) => {
+	await client.rpc("track_event", {
+		event_type: "product_view",
+		event_data: {
+			product_id: params.productId,
+		},
+	});
+};
 
 export default function ProductOverviewPage() {
 	const { description, how_it_works } = useOutletContext<{

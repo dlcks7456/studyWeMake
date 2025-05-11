@@ -50,6 +50,20 @@
       "when": 1744448266572,
       "tag": "0006_gifted_tyger_tiger",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1746935736727,
+      "tag": "0007_even_squadron_supreme",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1746938107601,
+      "tag": "0008_round_nova",
+      "breakpoints": true
     }
   ]
 }

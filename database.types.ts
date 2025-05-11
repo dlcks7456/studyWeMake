@@ -33,6 +33,27 @@ export type Database = {
         }
         Relationships: []
       }
+      events: {
+        Row: {
+          created_at: string
+          event_data: Json | null
+          event_id: string
+          event_type: Database["public"]["Enums"]["event_types"] | null
+        }
+        Insert: {
+          created_at?: string
+          event_data?: Json | null
+          event_id?: string
+          event_type?: Database["public"]["Enums"]["event_types"] | null
+        }
+        Update: {
+          created_at?: string
+          event_data?: Json | null
+          event_id?: string
+          event_type?: Database["public"]["Enums"]["event_types"] | null
+        }
+        Relationships: []
+      }
       follows: {
         Row: {
           created_at: string
@@ -576,7 +597,7 @@ export type Database = {
           icon: string
           name: string
           product_id: number
-          profile_id: string | null
+          profile_id: string
           stats: Json
           tagline: string
           updated_at: string
@@ -590,7 +611,7 @@ export type Database = {
           icon: string
           name: string
           product_id?: never
-          profile_id?: string | null
+          profile_id: string
           stats?: Json
           tagline: string
           updated_at?: string
@@ -604,7 +625,7 @@ export type Database = {
           icon?: string
           name?: string
           product_id?: never
-          profile_id?: string | null
+          profile_id?: string
           stats?: Json
           tagline?: string
           updated_at?: string
@@ -619,7 +640,7 @@ export type Database = {
             referencedColumns: ["category_id"]
           },
           {
-            foreignKeyName: "products_profile_id_profiles_profile_id_fk"
+            foreignKeyName: "products_to_profiles"
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -864,9 +885,16 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      track_event: {
+        Args: {
+          event_type: Database["public"]["Enums"]["event_types"]
+          event_data: Json
+        }
+        Returns: undefined
+      }
     }
     Enums: {
+      event_types: "product_view" | "product_visit" | "profile_view"
       job_type:
         | "full-time"
         | "part-time"
@@ -1006,6 +1034,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      event_types: ["product_view", "product_visit", "profile_view"],
       job_type: [
         "full-time",
         "part-time",
