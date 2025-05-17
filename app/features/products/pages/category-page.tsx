@@ -12,7 +12,7 @@ import {
 } from "../queries";
 import { z } from "zod";
 import { PAGE_SIZE } from "../constants";
-
+import { makeSSRClient } from "~/supa-client";
 export const meta: Route.MetaFunction = ({ params }) => {
 	const category = params.category;
 	return [
@@ -26,23 +26,24 @@ const paramsSchema = z.object({
 	page: z.coerce.number().optional().default(1),
 });
 
-export const loader = async ({ params }: Route.LoaderArgs) => {
+export const loader = async ({ params, request }: Route.LoaderArgs) => {
+	const { client, headers } = makeSSRClient(request);
 	const { data, success } = paramsSchema.safeParse(params);
 	if (!success) {
 		throw new Response("Invalid category", { status: 400 });
 	}
 
-	const products = await getProductByCategory({
+	const products = await getProductByCategory(client, {
 		categoryId: data.category,
 		limit: PAGE_SIZE,
 		page: data.page,
 	});
 
-	const totalPage = await getCategoryPages({
+	const totalPage = await getCategoryPages(client, {
 		categoryId: data.category,
 	});
 
-	const category = await getCategory({ categoryId: data.category });
+	const category = await getCategory(client, { categoryId: data.category });
 	return { category, products, totalPage };
 };
 

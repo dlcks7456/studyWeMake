@@ -5,7 +5,7 @@ import { ProductCard } from "../components/product-card";
 import { Link } from "react-router";
 import { DateTime } from "luxon";
 import { getProductsByDateRange } from "../queries";
-
+import { makeSSRClient } from "~/supa-client";
 export const meta: Route.MetaFunction = () => {
 	return [
 		{ title: "Leaderboards | wemake" },
@@ -13,25 +13,26 @@ export const meta: Route.MetaFunction = () => {
 	];
 };
 
-export const loader = async () => {
+export const loader = async ({ request }: Route.LoaderArgs) => {
+	const { client, headers } = makeSSRClient(request);
 	const [dailyProducts, weeklyProducts, monthlyProducts, yearlyProducts] =
 		await Promise.all([
-			getProductsByDateRange({
+			getProductsByDateRange(client, {
 				startDate: DateTime.now().startOf("day"),
 				endDate: DateTime.now().endOf("day"),
 				limit: 7,
 			}),
-			getProductsByDateRange({
+			getProductsByDateRange(client, {
 				startDate: DateTime.now().startOf("week"),
 				endDate: DateTime.now().endOf("week"),
 				limit: 7,
 			}),
-			getProductsByDateRange({
+			getProductsByDateRange(client, {
 				startDate: DateTime.now().startOf("month"),
 				endDate: DateTime.now().endOf("month"),
 				limit: 7,
 			}),
-			getProductsByDateRange({
+			getProductsByDateRange(client, {
 				startDate: DateTime.now().startOf("year"),
 				endDate: DateTime.now().endOf("year"),
 				limit: 7,
@@ -60,12 +61,12 @@ export default function LeaderboardsPage({ loaderData }: Route.ComponentProps) {
 				{loaderData.dailyProducts.map((product) => (
 					<ProductCard
 						key={product.product_id}
-						id={product.product_id.toString()}
+						id={Number(product.product_id)}
 						name={product.name}
 						description={product.tagline}
-						reviewsCount={product.reviews}
-						viewCount={product.views}
-						votesCount={product.upvotes}
+						reviewsCount={Number(product.reviews)}
+						viewCount={Number(product.views)}
+						votesCount={Number(product.upvotes)}
 					/>
 				))}
 
@@ -88,12 +89,12 @@ export default function LeaderboardsPage({ loaderData }: Route.ComponentProps) {
 				{loaderData.weeklyProducts.map((product) => (
 					<ProductCard
 						key={product.product_id}
-						id={product.product_id}
+						id={Number(product.product_id)}
 						name={product.name}
 						description={product.tagline}
-						reviewsCount={product.reviews}
-						viewCount={product.views}
-						votesCount={product.upvotes}
+						reviewsCount={Number(product.reviews)}
+						viewCount={Number(product.views)}
+						votesCount={Number(product.upvotes)}
 					/>
 				))}
 
@@ -116,12 +117,12 @@ export default function LeaderboardsPage({ loaderData }: Route.ComponentProps) {
 				{loaderData.monthlyProducts.map((product) => (
 					<ProductCard
 						key={product.product_id}
-						id={product.product_id.toString()}
+						id={Number(product.product_id)}
 						name={product.name}
 						description={product.tagline}
-						reviewsCount={product.reviews}
-						viewCount={product.views}
-						votesCount={product.upvotes}
+						reviewsCount={Number(product.reviews)}
+						viewCount={Number(product.views)}
+						votesCount={Number(product.upvotes)}
 					/>
 				))}
 
@@ -144,12 +145,12 @@ export default function LeaderboardsPage({ loaderData }: Route.ComponentProps) {
 				{loaderData.yearlyProducts.map((product) => (
 					<ProductCard
 						key={product.product_id}
-						id={product.product_id.toString()}
+						id={Number(product.product_id)}
 						name={product.name}
 						description={product.tagline}
-						reviewsCount={product.reviews}
-						viewCount={product.views}
-						votesCount={product.upvotes}
+						reviewsCount={Number(product.reviews)}
+						viewCount={Number(product.views)}
+						votesCount={Number(product.upvotes)}
 					/>
 				))}
 

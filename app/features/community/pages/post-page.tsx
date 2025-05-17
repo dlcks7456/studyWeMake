@@ -25,7 +25,7 @@ import { Reply } from "~/features/community/components/reply";
 import { z } from "zod";
 import { getPostById, getReplies } from "../queries";
 import { DateTime } from "luxon";
-
+import { makeSSRClient } from "~/supa-client";
 const postIdSchema = z.object({
 	postId: z.coerce.number(),
 });
@@ -34,15 +34,16 @@ export function meta({}: Route.MetaArgs) {
 	return [{ title: "Post | wemake" }];
 }
 
-export const loader = async ({ params }: Route.LoaderArgs) => {
+export const loader = async ({ params, request }: Route.LoaderArgs) => {
 	const { success, data } = postIdSchema.safeParse(params);
+	const { client, headers } = makeSSRClient(request);
 
 	if (!success) {
 		throw new Response("Not Found", { status: 404 });
 	}
 
-	const post = await getPostById({ postId: data.postId });
-	const replies = await getReplies({ postId: data.postId });
+	const post = await getPostById(client, { postId: data.postId });
+	const replies = await getReplies(client, { postId: data.postId });
 	return { post, replies };
 };
 

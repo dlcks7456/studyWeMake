@@ -5,7 +5,7 @@ import { Dialog, DialogTrigger } from "~/common/components/ui/dialog";
 import CreateReviewDialog from "../components/create-review-dialog";
 import { useOutletContext } from "react-router";
 import { getReviews } from "../queries";
-
+import { makeSSRClient } from "~/supa-client";
 export const meta: Route.MetaFunction = ({ params }) => {
 	const { productId } = params;
 	return [
@@ -14,8 +14,11 @@ export const meta: Route.MetaFunction = ({ params }) => {
 	];
 };
 
-export const loader = async ({ params }: Route.LoaderArgs) => {
-	const reviews = await getReviews({ productId: Number(params.productId) });
+export const loader = async ({ params, request }: Route.LoaderArgs) => {
+	const { client, headers } = makeSSRClient(request);
+	const reviews = await getReviews(client, {
+		productId: Number(params.productId),
+	});
 	return { reviews };
 };
 

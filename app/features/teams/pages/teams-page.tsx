@@ -2,6 +2,7 @@ import { TeamCard } from "../components/team-card";
 import type { Route } from "./+types/teams-page";
 import { Hero } from "~/common/components/hero";
 import { getTeams } from "../queries";
+import { makeSSRClient } from "~/supa-client";
 export const meta: Route.MetaFunction = () => {
 	return [
 		{ title: "Teams | wemake" },
@@ -9,8 +10,9 @@ export const meta: Route.MetaFunction = () => {
 	];
 };
 
-export const loader = async () => {
-	const teams = await getTeams({ limit: 20 });
+export const loader = async ({ request }: Route.LoaderArgs) => {
+	const { client, headers } = makeSSRClient(request);
+	const teams = await getTeams(client, { limit: 20 });
 	return { teams };
 };
 

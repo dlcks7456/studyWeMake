@@ -17,6 +17,7 @@ import {
 } from "~/common/components/ui/card";
 import { z } from "zod";
 import { getTeamById } from "../queries";
+import { makeSSRClient } from "~/supa-client";
 
 export const meta: Route.MetaFunction = () => {
 	return [
@@ -32,14 +33,15 @@ const teamIdSchema = z.object({
 	teamId: z.coerce.number(),
 });
 
-export const loader = async ({ params }: Route.LoaderArgs) => {
+export const loader = async ({ params, request }: Route.LoaderArgs) => {
 	const { success, data } = teamIdSchema.safeParse(params);
+	const { client, headers } = makeSSRClient(request);
 
 	if (!success) {
 		throw new Response("Not Found", { status: 404 });
 	}
 
-	const team = await getTeamById({ teamId: data.teamId });
+	const team = await getTeamById(client, { teamId: data.teamId });
 
 	return { team };
 };

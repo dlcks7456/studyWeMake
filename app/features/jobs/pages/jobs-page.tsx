@@ -8,7 +8,7 @@ import { cn } from "~/lib/utils";
 import { getJobs } from "../queries";
 import { z } from "zod";
 import { X } from "lucide-react";
-
+import { makeSSRClient } from "~/supa-client";
 export const meta: Route.MetaFunction = () => {
 	return [
 		{ title: "Jobs | webake" },
@@ -29,6 +29,7 @@ const searchParamsSchema = z.object({
 });
 
 export const loader = async ({ request }: Route.LoaderArgs) => {
+	const { client, headers } = makeSSRClient(request);
 	const url = new URL(request.url);
 	const { success, data: parsedData } = searchParamsSchema.safeParse(
 		Object.fromEntries(url.searchParams),
@@ -45,7 +46,7 @@ export const loader = async ({ request }: Route.LoaderArgs) => {
 		);
 	}
 
-	const jobs = await getJobs({
+	const jobs = await getJobs(client, {
 		limit: 40,
 		type: parsedData.type,
 		location: parsedData.location,

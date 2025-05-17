@@ -8,6 +8,7 @@ import { Button } from "~/common/components/ui/button";
 import { ProductPagenation } from "~/common/components/product-pagenation";
 import { getProductPagesByDateRange, getProductsByDateRange } from "../queries";
 import { PAGE_SIZE } from "../constants";
+import { makeSSRClient } from "~/supa-client";
 const paramsSchema = z.object({
 	year: z.coerce.number(),
 	week: z.coerce.number(),
@@ -45,7 +46,7 @@ export const meta: Route.MetaFunction = ({ params, data }) => {
 
 export const loader = async ({ params, request }: Route.LoaderArgs) => {
 	const { success, data: parsedData } = paramsSchema.safeParse(params);
-
+	const { client, headers } = makeSSRClient(request);
 	if (!success) {
 		throw data({
 			error_code: "INVALID_PARAMS",
@@ -82,14 +83,14 @@ export const loader = async ({ params, request }: Route.LoaderArgs) => {
 
 	const url = new URL(request.url);
 
-	const products = await getProductsByDateRange({
+	const products = await getProductsByDateRange(client, {
 		startDate: date.startOf("week"),
 		endDate: date.endOf("week"),
 		limit: PAGE_SIZE,
 		page: Number(url.searchParams.get("page") || 1),
 	});
 
-	const totalPages = await getProductPagesByDateRange({
+	const totalPages = await getProductPagesByDateRange(client, {
 		startDate: date.startOf("week"),
 		endDate: date.endOf("week"),
 	});
@@ -143,13 +144,13 @@ export default function WeeklyLeaderboardsPage({
 			<div className="space-y-5 w-full max-w-screen-md mx-auto">
 				{loaderData.products.map((product) => (
 					<ProductCard
-						key={product.product_id}
-						id={product.product_id.toString()}
+						key={Number(product.product_id)}
+						id={Number(product.product_id)}
 						name={product.name}
 						description={product.tagline}
-						reviewsCount={product.reviews}
-						viewCount={product.views}
-						votesCount={product.upvotes}
+						reviewsCount={Number(product.reviews)}
+						viewCount={Number(product.views)}
+						votesCount={Number(product.upvotes)}
 					/>
 				))}
 			</div>

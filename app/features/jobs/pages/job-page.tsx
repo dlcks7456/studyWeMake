@@ -5,7 +5,7 @@ import { Button } from "~/common/components/ui/button";
 import { getJobById } from "../queries";
 import { z } from "zod";
 import { DateTime } from "luxon";
-
+import { makeSSRClient } from "~/supa-client";
 const jobSchema = z.object({
 	jobId: z.coerce.number(),
 });
@@ -20,14 +20,15 @@ export const meta: Route.MetaFunction = () => {
 	];
 };
 
-export const loader = async ({ params }: Route.LoaderArgs) => {
+export const loader = async ({ params, request }: Route.LoaderArgs) => {
 	const { success, data } = jobSchema.safeParse(params);
+	const { client, headers } = makeSSRClient(request);
 
 	if (!success) {
 		throw new Response("Not Found", { status: 404 });
 	}
 
-	const job = await getJobById({ jobId: data.jobId });
+	const job = await getJobById(client, { jobId: Number(data.jobId) });
 	return { job };
 };
 

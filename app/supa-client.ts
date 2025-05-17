@@ -1,8 +1,14 @@
-import { createClient } from "@supabase/supabase-js";
-import type { Database as SupabaseDatabase } from "database.types";
+import {
+	createBrowserClient,
+	createServerClient,
+	parseCookieHeader,
+	serializeCookieHeader,
+} from "@supabase/ssr";
 import type { MergeDeep, SetNonNullable, SetFieldType } from "type-fest";
+import type { Database as SupabaseDatabase } from "database.types";
+import { createClient } from "@supabase/supabase-js";
 
-type Database = MergeDeep<
+export type Database = MergeDeep<
 	SupabaseDatabase,
 	{
 		public: {
@@ -41,9 +47,37 @@ type Database = MergeDeep<
 	}
 >;
 
-export const client = createClient<Database>(
-	// process.env.SUPABASE_URL!,
-	// process.env.SUPABASE_ANON_KEY!,
-	"https://wbdacbuwmloxoirwtyef.supabase.co",
-	"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiZGFjYnV3bWxveG9pcnd0eWVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE3ODAwNTMsImV4cCI6MjA1NzM1NjA1M30.uRhX71vMiVslelQI2jNA379UPH6IFqUMNRMOLABAsoc",
+// export const client = createClient<Database>(
+// 	process.env.SUPABASE_URL!,
+// 	process.env.SUPABASE_ANON_KEY!,
+// );
+
+export const browserClient = createBrowserClient<Database>(
+	process.env.SUPABASE_URL!,
+	process.env.SUPABASE_ANON_KEY!,
 );
+
+export const makeSSRClient = (request: Request) => {
+	const headers = new Headers();
+	const serverSideClient = createServerClient<Database>(
+		process.env.SUPABASE_URL!,
+		process.env.SUPABASE_ANON_KEY!,
+		{
+			cookies: {
+				getAll() {
+					return parseCookieHeader(request.headers.get("cookie") ?? "");
+				},
+				setAll(cookiesToSet) {
+					cookiesToSet.forEach(({ name, value, options }) => {
+						headers.append(
+							"Set-Cookie",
+							serializeCookieHeader(name, value, options),
+						);
+					});
+				},
+			},
+		},
+	);
+
+	return { client: serverSideClient, headers };
+};
