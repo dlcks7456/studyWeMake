@@ -18,7 +18,7 @@ import { Textarea } from "~/common/components/ui/textarea";
 import { cn } from "~/lib/utils";
 import type { Route } from "./+types/profile-layout";
 import { getUserProfile } from "../queries";
-import { client } from "~/supa-client";
+import { makeSSRClient } from "~/supa-client";
 
 // export const loader = async ({
 // 	params,
@@ -32,7 +32,8 @@ export const loader = async ({
 	request,
 }: Route.LoaderArgs & { params: { username: string } }) => {
 	const { username } = params;
-	const user = await getUserProfile(username);
+	const { client } = makeSSRClient(request);
+	const user = await getUserProfile(client, { username });
 	if (request.url.endsWith(`/users/${username}`)) {
 		await client.rpc("track_event", {
 			event_type: "profile_view",

@@ -1,16 +1,31 @@
+import { z } from "zod";
 import type { Route } from "./+types/social-complete-page";
+import { redirect } from "react-router";
+import { makeSSRClient } from "~/supa-client";
 
-export default function SocialCompletePage({}: Route.ComponentProps) {
-	return (
-		<>
-			<div className="flex flex-col space-y-2 text-center">
-				<h1 className="text-2xl font-semibold tracking-tight">
-					Authentication Complete
-				</h1>
-				<p className="text-sm text-muted-foreground">
-					Successfully authenticated with provider
-				</p>
-			</div>
-		</>
-	);
-}
+const paramsSchema = z.object({
+	provider: z.enum(["kakao", "github"]),
+});
+
+export const loader = async ({ params, request }: Route.LoaderArgs) => {
+	const { success, data } = paramsSchema.safeParse(params);
+	if (!success) {
+		return redirect("/auth/login");
+	}
+
+	const url = new URL(request.url);
+	const code = url.searchParams.get("code");
+
+	if (!code) {
+		return redirect("/auth/login");
+	}
+
+	const { client, headers } = makeSSRClient(request);
+	const { error } = await client.auth.exchangeCodeForSession(code);
+
+	if (error) {
+		throw error;
+	}
+
+	return redirect("/", { headers });
+};
