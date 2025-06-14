@@ -4,12 +4,12 @@ import { Button } from "~/common/components/ui/button";
 import { Link, useOutletContext } from "react-router";
 import { makeSSRClient } from "~/supa-client";
 
-// export const meta: Route.MetaFunction = () => {
-// 	return [
-// 		{ title: "Product Overview | wemake" },
-// 		{ name: "description", content: "Product Overview" },
-// 	];
-// };
+export const meta: Route.MetaFunction = () => {
+	return [
+		{ title: "Product Overview | wemake" },
+		{ name: "description", content: "Product Overview" },
+	];
+};
 
 export const loader = async ({ params, request }: Route.LoaderArgs) => {
 	const { client, headers } = makeSSRClient(request);

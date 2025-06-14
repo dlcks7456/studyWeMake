@@ -25,7 +25,7 @@ const searchParamsSchema = z.object({
 			LOCATION_TYPES.map((location) => location.value) as [string, ...string[]],
 		)
 		.optional(),
-	salary: z.enum(SALARY_RANGE as [string, ...string[]]).optional(),
+	salary: z.enum(SALARY_RANGE).optional(),
 });
 
 export const loader = async ({ request }: Route.LoaderArgs) => {

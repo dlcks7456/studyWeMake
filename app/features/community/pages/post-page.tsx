@@ -6,10 +6,11 @@ import {
 	BreadcrumbSeparator,
 } from "~/common/components/ui/breadcrumb";
 import type { Route } from "./+types/post-page";
-import { Form, Link } from "react-router";
+import { Form, Link, useNavigation, useOutletContext } from "react-router";
 import {
 	ChevronUpIcon,
 	DotIcon,
+	LoaderCircleIcon,
 	MessageCircleIcon,
 	UserIcon,
 } from "lucide-react";
@@ -26,6 +27,9 @@ import { z } from "zod";
 import { getPostById, getReplies } from "../queries";
 import { DateTime } from "luxon";
 import { makeSSRClient } from "~/supa-client";
+import { getLoggedInUserID } from "~/features/users/queries";
+import { createReply } from "../mutations";
+import { useEffect, useRef } from "react";
 const postIdSchema = z.object({
 	postId: z.coerce.number(),
 });
@@ -47,7 +51,59 @@ export const loader = async ({ params, request }: Route.LoaderArgs) => {
 	return { post, replies };
 };
 
-export default function PostPage({ loaderData }: Route.ComponentProps) {
+const formSchema = z.object({
+	reply: z.string().min(1),
+	topLevelId: z.coerce.number().optional(),
+});
+
+export const action = async ({ request, params }: Route.ActionArgs) => {
+	const { client } = makeSSRClient(request);
+	const userId = await getLoggedInUserID(client);
+	const formData = await request.formData();
+	const { success, error, data } = formSchema.safeParse(
+		Object.fromEntries(formData),
+	);
+	if (!success) {
+		return {
+			formErrors: error.flatten().fieldErrors,
+		};
+	}
+
+	const { reply, topLevelId } = data;
+	await createReply(client, {
+		postId: params.postId,
+		reply,
+		userId,
+		topLevelId,
+	});
+
+	return {
+		ok: true,
+	};
+};
+
+export default function PostPage({
+	loaderData,
+	actionData,
+}: Route.ComponentProps) {
+	const { isLoggedIn, name, avatar } = useOutletContext<{
+		isLoggedIn: boolean;
+		name: string | null;
+		username: string | null;
+		avatar: string | null;
+	}>();
+
+	const navigation = useNavigation();
+	const isSubmitting =
+		navigation.state === "submitting" || navigation.state === "loading";
+
+	const formRef = useRef<HTMLFormElement>(null);
+	useEffect(() => {
+		if (actionData?.ok) {
+			formRef.current?.reset();
+		}
+	}, [actionData?.ok]);
+
 	return (
 		<div className="space-y-10">
 			<div>
@@ -100,29 +156,51 @@ export default function PostPage({ loaderData }: Route.ComponentProps) {
 									{loaderData.post.content}
 								</p>
 							</div>
-							<Form className="flex items-start gap-5 w-3/4">
-								<Avatar className="size-14">
-									<AvatarFallback>N</AvatarFallback>
-									<AvatarImage src="https://github.com/microsoft.png" />
-								</Avatar>
-								<div className="flex flex-col gap-5 items-end w-full">
-									<Textarea
-										placeholder="Write a reply"
-										className="w-full resize-none"
-										rows={5}
-									/>
-									<Button>Reply</Button>
-								</div>
-							</Form>
+							{isLoggedIn ? (
+								<Form
+									ref={formRef}
+									className="flex items-start gap-5 w-3/4"
+									method="post"
+								>
+									<Avatar className="size-14">
+										{avatar ? (
+											<AvatarImage src={avatar} />
+										) : (
+											<AvatarFallback>{name?.[0]}</AvatarFallback>
+										)}
+									</Avatar>
+									<div className="flex flex-col gap-5 items-end w-full">
+										<Textarea
+											placeholder="Write a reply"
+											className="w-full resize-none"
+											rows={5}
+											name="reply"
+											// key={isSubmitting ? "submitting" : "idle"}
+											// defaultValue={isSubmitting ? "" : undefined}
+										/>
+										<Button disabled={isSubmitting} className="w-fit">
+											{isSubmitting ? (
+												<LoaderCircleIcon className="size-4 animate-spin" />
+											) : (
+												"Reply"
+											)}
+										</Button>
+									</div>
+								</Form>
+							) : null}
 							<div className="space-y-10">
-								<h4 className="font-semibold">Replies</h4>
+								<h4 className="font-semibold">
+									{loaderData.replies.length} Replies
+								</h4>
 								{loaderData.replies.map((reply) => (
 									<Reply
-										avatarUrl={reply.user?.avatar ? reply.user.avatar : null}
-										username={reply.user?.username ? reply.user.username : null}
+										name={reply.user.name}
+										username={reply.user.username}
+										avatarUrl={reply.user.avatar}
 										timestamp={reply.created_at}
 										content={reply.reply}
 										topLevel={true}
+										topLevelId={reply.post_reply_id}
 										replies={reply.post_replies}
 									/>
 								))}
@@ -133,10 +211,13 @@ export default function PostPage({ loaderData }: Route.ComponentProps) {
 				<aside className="col-span-2 border rounded-lg shadow-sm p-6 space-y-5">
 					<div className="flex gap-5">
 						<Avatar className="size-14">
-							<AvatarFallback>{loaderData.post.author_name[0]}</AvatarFallback>
 							{loaderData.post.author_avatar !== null ? (
 								<AvatarImage src={loaderData.post.author_avatar} />
-							) : null}
+							) : (
+								<AvatarFallback>
+									{loaderData.post.author_name[0] ?? "N"}
+								</AvatarFallback>
+							)}
 						</Avatar>
 						<div className="flex flex-col items-start">
 							<h4 className="text-lg font-medium">

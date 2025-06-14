@@ -4,4 +4,4 @@ export const PRODUCT_STAGES = [
 	{ label: "MVP", value: "mvp" },
 	{ label: "Growth", value: "growth" },
 	{ label: "Mature", value: "mature" },
-];
+] as const;

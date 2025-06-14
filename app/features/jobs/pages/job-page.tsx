@@ -10,9 +10,9 @@ const jobSchema = z.object({
 	jobId: z.coerce.number(),
 });
 
-export const meta: Route.MetaFunction = () => {
+export const meta: Route.MetaFunction = ({ data }) => {
 	return [
-		{ title: "Senior Frontend Developer at Company Name | webake" },
+		{ title: `${data.job.position} | webake` },
 		{
 			name: "description",
 			content: "Apply for Senior Frontend Developer position at Company Name",

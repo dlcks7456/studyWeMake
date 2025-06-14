@@ -1,5 +1,7 @@
 import { IdeaCard } from "~/features/ideas/components/idea-card";
 import type { Route } from "./+types/dashboard-ideas-page";
+import { makeSSRClient } from "~/supa-client";
+import { getClaimedIdeas, getLoggedInUserID } from "../queries";
 
 export const meta: Route.MetaFunction = () => {
 	return [
@@ -8,20 +10,27 @@ export const meta: Route.MetaFunction = () => {
 	];
 };
 
-export default function DashboardIdeasPage() {
+export const loader = async ({ request }: Route.LoaderArgs) => {
+	const { client, headers } = makeSSRClient(request);
+	const userId = await getLoggedInUserID(client);
+	const ideas = await getClaimedIdeas(client, { userId });
+
+	return { ideas };
+};
+
+export default function DashboardIdeasPage({
+	loaderData,
+}: Route.ComponentProps) {
 	return (
 		<div className="space-y-10 h-full">
 			<h1 className="text-2xl font-semibold mb6">Claimed Ideas</h1>
 			<div className="grid grid-cols-4 gap-6">
-				{Array.from({ length: 11 }).map((_, index) => (
+				{loaderData.ideas.map((idea) => (
 					<IdeaCard
-						key={index}
-						id={index}
-						title="A startup that creates an AI-powered generated personal trainer, delivering customized fitness recommendations and tracking of progress using a mobile app to track workouts and progress as well as a website to manage the business."
-						viewCount={123}
-						postedAt="12 hours ago"
-						likesCount={12}
-						claimed={index % 2 === 0}
+						key={idea.gpt_idea_id}
+						id={idea.gpt_idea_id}
+						title={idea.idea}
+						owner={true}
 					/>
 				))}
 			</div>

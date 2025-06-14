@@ -1,6 +1,6 @@
 import { StarIcon } from "lucide-react";
 import { useState } from "react";
-import { Form } from "react-router";
+import { Form, useActionData } from "react-router";
 import InputPair from "~/common/components/input-pair";
 import { Button } from "~/common/components/ui/button";
 import {
@@ -12,8 +12,11 @@ import {
 
 import { DialogContent } from "~/common/components/ui/dialog";
 import { Label } from "~/common/components/ui/label";
+import type { action } from "../pages/product-reviews-page";
 
 export default function CreateReviewDialog() {
+	const actionData = useActionData<typeof action>();
+
 	const [rating, setRating] = useState<number>(0);
 	const [hoveredStar, setHoveredStar] = useState<number>(0);
 
@@ -27,7 +30,7 @@ export default function CreateReviewDialog() {
 					Please write a review for the product.
 				</DialogDescription>
 			</DialogHeader>
-			<Form className="space-y-5">
+			<Form className="space-y-5" method="post">
 				<div>
 					<Label className="flex flex-col gap-1">
 						Rating{" "}
@@ -62,6 +65,11 @@ export default function CreateReviewDialog() {
 							</label>
 						))}
 					</div>
+					{actionData?.formErrors?.rating && (
+						<p className="text-red-500">
+							{actionData.formErrors.rating.join(", ")}
+						</p>
+					)}
 				</div>
 				<InputPair
 					label="Review"
@@ -71,6 +79,11 @@ export default function CreateReviewDialog() {
 					textArea
 					required
 				/>
+				{actionData?.formErrors?.review && (
+					<p className="text-red-500">
+						{actionData.formErrors.review.join(", ")}
+					</p>
+				)}
 				<DialogFooter>
 					<Button type="submit">Submit Review</Button>
 				</DialogFooter>
