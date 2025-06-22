@@ -104,3 +104,16 @@ export const getClaimedIdeas = async (
 
 	return data;
 };
+
+export const getProductsByUserId = async (
+	client: SupabaseClient<Database>,
+	{ userId }: { userId: string },
+) => {
+	const { data, error } = await client
+		.from("products")
+		.select(`name, product_id`)
+		.eq("profile_id", userId);
+
+	if (error) throw new Error(error.message);
+	return data;
+};
