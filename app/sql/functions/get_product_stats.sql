@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION public.get_product_stats(product_id uuid)
+CREATE OR REPLACE FUNCTION public.get_product_stats(product_id text)
 RETURNS TABLE (
     product_views bigint,
     product_visits bigint,

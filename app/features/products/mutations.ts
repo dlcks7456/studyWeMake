@@ -27,3 +27,47 @@ export const createProductReview = async (
 
 	return data;
 };
+
+export const createProduct = async (
+	client: SupabaseClient<Database>,
+	{
+		userId,
+		name,
+		tagline,
+		description,
+		howItWorks,
+		url,
+		iconUrl,
+		category_id,
+	}: {
+		userId: string;
+		name: string;
+		tagline: string;
+		description: string;
+		howItWorks: string;
+		url: string;
+		iconUrl: string;
+		category_id: number;
+	},
+) => {
+	const { data, error } = await client
+		.from("products")
+		.insert({
+			name,
+			tagline,
+			description,
+			how_it_works: howItWorks,
+			url,
+			icon: iconUrl,
+			category_id,
+			profile_id: userId,
+		})
+		.select("product_id")
+		.single();
+
+	if (error) {
+		throw error;
+	}
+
+	return data.product_id;
+};
