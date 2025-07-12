@@ -6,7 +6,13 @@ import {
 	BreadcrumbSeparator,
 } from "~/common/components/ui/breadcrumb";
 import type { Route } from "./+types/post-page";
-import { Form, Link, useNavigation, useOutletContext } from "react-router";
+import {
+	Form,
+	Link,
+	useFetcher,
+	useNavigation,
+	useOutletContext,
+} from "react-router";
 import {
 	ChevronUpIcon,
 	DotIcon,
@@ -30,6 +36,7 @@ import { makeSSRClient } from "~/supa-client";
 import { getLoggedInUserID } from "~/features/users/queries";
 import { createReply } from "../mutations";
 import { useEffect, useRef } from "react";
+import { cn } from "~/lib/utils";
 const postIdSchema = z.object({
 	postId: z.coerce.number(),
 });
@@ -86,6 +93,8 @@ export default function PostPage({
 	loaderData,
 	actionData,
 }: Route.ComponentProps) {
+	const fetcher = useFetcher();
+
 	const { isLoggedIn, name, avatar } = useOutletContext<{
 		isLoggedIn: boolean;
 		name: string | null;
@@ -136,10 +145,24 @@ export default function PostPage({
 			<div className="grid grid-cols-6 gap-40 items-start">
 				<div className="col-span-4 space-y-10">
 					<div className="flex w-full items-start gap-10">
-						<Button variant="outline" className="flex flex-col h-14">
-							<ChevronUpIcon className="size-4 shrink-0" />
-							<span>10</span>
-						</Button>
+						<fetcher.Form
+							method="post"
+							action={`/community/${loaderData.post.post_id}/upvote`}
+							className="flex flex-col h-14"
+						>
+							<Button
+								variant="outline"
+								className={cn(
+									"flex flex-col h-14",
+									loaderData.post.is_upvoted
+										? "border-primary text-primary"
+										: "",
+								)}
+							>
+								<ChevronUpIcon className="size-4 shrink-0" />
+								<span>{loaderData.post.upvotes}</span>
+							</Button>
+						</fetcher.Form>
 						<div className="space-y-5 w-full">
 							<div className="space-y-2 mb-20">
 								<h2 className="text-3xl font-bold">{loaderData.post.title}</h2>
