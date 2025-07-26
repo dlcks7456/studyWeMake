@@ -64,6 +64,13 @@
       "when": 1746938107601,
       "tag": "0008_round_nova",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1753493464048,
+      "tag": "0009_organic_thunderbolt",
+      "breakpoints": true
     }
   ]
 }

@@ -76,6 +76,7 @@ export const notifications = pgTable("notifications", {
 			onDelete: "cascade",
 		})
 		.notNull(),
+	seen: boolean().notNull().default(false),
 	type: notificationType().notNull(),
 	created_at: timestamp().notNull().defaultNow(),
 });
