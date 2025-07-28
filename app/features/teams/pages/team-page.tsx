@@ -128,11 +128,15 @@ export default function TeamPage({ loaderData }: Route.ComponentProps) {
 							</Badge>
 						</div>
 					</div>
-					<Form className="space-y-5">
+					<Form
+						method="post"
+						className="space-y-5"
+						action={`/users/${loaderData.team.team_leader.username}/messages`}
+					>
 						<InputPair
 							label="Introduce your self"
 							description="Tell us about yourself"
-							name="introduction"
+							name="content"
 							id="introduction"
 							placeholder="i.e I am a React Developer with 3 years of experience"
 							textArea

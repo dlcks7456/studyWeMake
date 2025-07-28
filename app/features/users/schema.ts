@@ -113,15 +113,16 @@ export const messages = pgTable("messages", {
 	message_id: bigint({ mode: "number" })
 		.primaryKey()
 		.generatedByDefaultAsIdentity(),
-	message_room_id: bigint({ mode: "number" }).references(
-		() => messageRoom.message_room_id,
-		{
+	message_room_id: bigint({ mode: "number" })
+		.references(() => messageRoom.message_room_id, {
 			onDelete: "cascade",
-		},
-	),
-	sender_id: uuid().references(() => profiles.profile_id, {
-		onDelete: "cascade",
-	}),
+		})
+		.notNull(),
+	sender_id: uuid()
+		.references(() => profiles.profile_id, {
+			onDelete: "cascade",
+		})
+		.notNull(),
 	content: text().notNull(),
 	seen: boolean().notNull().default(false),
 	created_at: timestamp().notNull().defaultNow(),
