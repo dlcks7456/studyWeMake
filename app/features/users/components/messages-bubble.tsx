@@ -9,11 +9,13 @@ interface MessageBubbleProps {
 	content: string;
 	avatarSrc?: string;
 	isCurrentUser?: boolean;
+	avatarFallback?: string;
 }
 
 export function MessageBubble({
 	content,
 	avatarSrc,
+	avatarFallback,
 	isCurrentUser = false,
 }: MessageBubbleProps) {
 	return (
@@ -24,7 +26,7 @@ export function MessageBubble({
 			)}
 		>
 			<Avatar>
-				<AvatarFallback>N</AvatarFallback>
+				<AvatarFallback>{avatarFallback ?? "N"}</AvatarFallback>
 				{avatarSrc && <AvatarImage src={avatarSrc} />}
 			</Avatar>
 			<div

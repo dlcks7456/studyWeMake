@@ -13,6 +13,11 @@ export type Database = MergeDeep<
 	{
 		public: {
 			Views: {
+				messages_view: {
+					Row: SetNonNullable<
+						SupabaseDatabase["public"]["Views"]["messages_view"]["Row"]
+					>;
+				};
 				community_post_list_view: {
 					Row: SetFieldType<
 						SetNonNullable<
@@ -54,8 +59,8 @@ export const makeAdminClient = () =>
 	);
 
 export const browserClient = createBrowserClient<Database>(
-	process.env.SUPABASE_URL!,
-	process.env.SUPABASE_ANON_KEY!,
+	"https://wbdacbuwmloxoirwtyef.supabase.co",
+	"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiZGFjYnV3bWxveG9pcnd0eWVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDE3ODAwNTMsImV4cCI6MjA1NzM1NjA1M30.uRhX71vMiVslelQI2jNA379UPH6IFqUMNRMOLABAsoc",
 );
 
 export const makeSSRClient = (request: Request) => {

@@ -174,3 +174,109 @@ export const countNotifications = async (
 
 	return count ?? 0;
 };
+
+export const getMessages = async (
+	client: SupabaseClient<Database>,
+	{ userId }: { userId: string },
+) => {
+	const { data, error } = await client
+		.from("messages_view")
+		.select("*")
+		.eq("profile_id", userId)
+		.neq("other_profile_id", userId);
+
+	if (error) {
+		throw error;
+	}
+	return data;
+};
+
+export const getMessagesByRoomId = async (
+	client: SupabaseClient<Database>,
+	{ messageRoomId, userId }: { messageRoomId: string; userId: string },
+) => {
+	const { count, error: countError } = await client
+		.from("message_room_members")
+		.select("*", { count: "exact", head: true })
+		.eq("message_room_id", messageRoomId)
+		.eq("profile_id", userId);
+
+	if (countError) throw countError;
+
+	if (count === 0) {
+		throw new Error("You are not a member of this message room");
+	}
+
+	const { data, error } = await client
+		.from("messages")
+		.select(`*`)
+		.eq("message_room_id", messageRoomId)
+		.order("created_at", { ascending: true });
+
+	if (error) throw error;
+	return data;
+};
+
+export const getRoomsParticipant = async (
+	client: SupabaseClient<Database>,
+	{ messageRoomId, userId }: { messageRoomId: string; userId: string },
+) => {
+	const { count, error: countError } = await client
+		.from("message_room_members")
+		.select("*", { count: "exact", head: true })
+		.eq("message_room_id", messageRoomId)
+		.eq("profile_id", userId);
+
+	if (countError) throw countError;
+
+	if (count === 0) {
+		throw new Error("You are not a member of this message room");
+	}
+
+	const { data, error } = await client
+		.from("message_room_members")
+		.select(
+			`
+			profile:profiles!profile_id!inner(
+				name,
+				avatar,
+				profile_id
+			)
+			`,
+		)
+		.eq("message_room_id", messageRoomId)
+		.neq("profile_id", userId)
+		.single();
+
+	if (error) throw error;
+	return data;
+};
+
+export const sendMessageToRoom = async (
+	client: SupabaseClient<Database>,
+	{
+		messageRoomId,
+		userId,
+		message,
+	}: { messageRoomId: string; userId: string; message: string },
+) => {
+	const { count, error: countError } = await client
+		.from("message_room_members")
+		.select("*", { count: "exact", head: true })
+		.eq("message_room_id", messageRoomId)
+		.eq("profile_id", userId);
+
+	if (countError) throw countError;
+
+	if (count === 0) {
+		throw new Error("You are not a member of this message room");
+	}
+
+	const { error } = await client.from("messages").insert({
+		message_room_id: Number(messageRoomId),
+		sender_id: userId,
+		content: message,
+	});
+
+	if (error) throw error;
+};
