@@ -10,6 +10,7 @@ import {
 	text,
 	timestamp,
 	uuid,
+	boolean,
 } from "drizzle-orm/pg-core";
 import { profiles } from "../users/schema";
 import { sql } from "drizzle-orm";
@@ -21,6 +22,7 @@ export const products = pgTable(
 			.primaryKey()
 			.generatedAlwaysAsIdentity(),
 		name: text().notNull(),
+		// is_promoted: boolean().notNull().default(false),
 		tagline: text().notNull(),
 		description: text().notNull(),
 		how_it_works: text().notNull(),

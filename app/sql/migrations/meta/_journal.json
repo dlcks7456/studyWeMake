@@ -71,6 +71,41 @@
       "when": 1753493464048,
       "tag": "0009_organic_thunderbolt",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1757213718517,
+      "tag": "0010_robust_zeigeist",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1757214374969,
+      "tag": "0011_swift_vin_gonzales",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1757214636233,
+      "tag": "0012_vengeful_goliath",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1757215225514,
+      "tag": "0013_chunky_demogoblin",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1757215231760,
+      "tag": "0014_fantastic_leper_queen",
+      "breakpoints": true
     }
   ]
 }

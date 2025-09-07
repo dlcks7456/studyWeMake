@@ -42,6 +42,11 @@ export default [
 		route("/search", "features/products/pages/search-page.tsx"),
 		route("/submit", "features/products/pages/submit-product-page.tsx"),
 		route("/promote", "features/products/pages/promote-page.tsx"),
+		route(
+			"/promote/success",
+			"features/products/pages/promote-success-page.tsx",
+		),
+		route("/promote/fail", "features/products/pages/promote-fail-page.tsx"),
 		...prefix("/:productId", [
 			index("features/products/pages/product-redirect-page.tsx"),
 			layout("features/products/layouts/product-overview-layout.tsx", [
@@ -56,6 +61,7 @@ export default [
 	...prefix("/ideas", [
 		index("features/ideas/pages/ideas-page.tsx"),
 		route("/:ideaId", "features/ideas/pages/idea-page.tsx"),
+		route("/generate", "features/ideas/pages/generate-idea-page.tsx"),
 	]),
 	...prefix("/jobs", [
 		index("features/jobs/pages/jobs-page.tsx"),
@@ -120,5 +126,6 @@ export default [
 			route("/posts", "features/users/pages/profile-posts-page.tsx"),
 		]),
 		route("/messages", "features/users/pages/send-message-page.tsx"),
+		route("/welcome", "features/users/pages/welcome-page.tsx"),
 	]),
 ] satisfies RouteConfig;
